@@ -1,0 +1,667 @@
+CODE
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+                          Linux Ubuntu
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+ 
+# Install SRA toolkit
+
+mkdir SRA_TOOLKIT
+cd SRA_TOOLKIT
+wget --output-document sratoolkit.tar.gz https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz
+tar -vxzf sratoolkit.tar.gz
+export PATH=$PWD/sratoolkit.3.0.0-ubuntu64/bin
+which fastq-dump
+# extra export PATH=/usr/bin:/bin:$PATH
+# extra source ~/.bashrc
+which fastq-dump
+mkdir COLON_CANCER
+vdb-config -i # Set directory want to data to download 
+# Mine was /mnt/e/SRA_TOOLKIT
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+
+# Next download Conda 
+##( https://www.youtube.com/watch?v=AshsPB3KT-E )
+wget https://repo.anaconda.com/archive/Anaconda3-2024.10-1-Linux-x86_64.sh
+ls
+chmod +X Anaconda3-2024.10-1-Linux-x86_64.sh
+ls
+./Anaconda3-2024.10-1-Linux-x86_64.sh
+  >>> Press Enter
+yes
+  Enter
+yes 
+conda config --set auto_activate_base false
+
+conda config --show channels
+conda config --add channels conda-forge
+conda config --add channels bioconda
+conda config --show channels
+
+conda env list
+conda create -n bioinformatics
+
+clear
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+
+# Install FastQC, Trimmomatic, HISAT2, Samtools, featureCounts
+
+conda activate bioinformatics
+
+conda --version
+# verify conda is installed.
+conda update conda
+# update conda to latest version.
+
+y
+
+conda install -y -c bioconda fastqc trimmomatic hisat2 samtools subread
+conda install -c conda-forge libgcc-ng
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+
+# Download Sample Data 
+# GEO GSE295831
+
+# Sample_1_1 disease condition
+prefetch -v SRR33341769
+
+# Sample_1_2 disease condition 
+prefetch -v SRR33341768
+
+# Sample_1_3 disease condition
+prefetch -v SRR33341767
+
+# Sample_1_4 disease condition
+prefetch -v SRR33341766
+
+# Sample_2_1 control condition
+prefetch -v SRR33341765
+
+# Sample_2_2 control condition
+prefetch -v SRR33341764
+
+# Sample_2_3 control condition
+prefetch -v SRR33341763
+
+# Sample_2_4 control condition
+prefetch -v SRR33341762
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+
+# Convert .sra to .fastq
+
+# Use fasterq-dump (preferred – faster and more reliable)
+
+# Sample_1_1 disease condition
+fasterq-dump SRR33341769 -O ./fastq_output/
+
+# Sample_1_2 disease condition 
+fasterq-dump SRR33341768 -O ./fastq_output/
+
+# Sample_1_3 disease condition
+fasterq-dump SRR33341767 -O ./fastq_output/
+
+# Sample_1_4 disease condition
+fasterq-dump SRR33341766 -O ./fastq_output/
+
+# Sample_2_1 control condition
+fasterq-dump SRR33341765 -O ./fastq_output/
+
+# Sample_2_2 control condition
+fasterq-dump SRR33341764 -O ./fastq_output/
+
+# Sample_2_3 control condition
+fasterq-dump SRR33341763 -O ./fastq_output/
+
+# Sample_2_4 control condition
+fasterq-dump SRR33341762 -O ./fastq_output/
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+# Move .fastq file to working folder 
+-----------------------------------------------------------------
+# Activate your environment
+conda activate bioinformatics 
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+
+# Quality Control
+
+# Sample_1_1 disease condition
+fastqc SRR33341769.fastq -o fastqc_reports/
+
+# Sample_1_2 disease condition 
+fastqc SRR33341768.fastq -o fastqc_reports/
+
+# Sample_1_3 disease condition
+fastqc SRR33341767.fastq -o fastqc_reports/
+
+# Sample_1_4 disease condition
+fastqc SRR33341766.fastq -o fastqc_reports/
+
+# Sample_2_1 control condition
+fastqc SRR33341765.fastq -o fastqc_reports/
+
+# Sample_2_2 control condition
+fastqc SRR33341764.fastq -o fastqc_reports/ 
+
+# Sample_2_3 control condition
+fastqc SRR33341763.fastq -o fastqc_reports/ 
+
+# Sample_2_4 control condition
+fastqc SRR33341762.fastq -o fastqc_reports/
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+
+# Trim adapters and reads of low quality using Trimmomatic
+
+# trimmomatic SE -threads 4 -phred33 \
+# <input_file.fastq> \
+# <output_file.trimmed.fastq> \
+# ILLUMINACLIP:<adapters_file.fa>:2:30:10 \
+# LEADING:3 \
+# TRAILING:3 \
+# SLIDINGWINDOW:4:15 \
+# MINLEN:36
+
+-----------------------------------------------------------------
+
+# Sample_1_1 disease condition
+
+trimmomatic SE -threads 4 -phred33 \
+SRR33341769.fastq \
+trimmed_fastq/Sample_1_1_trimmed.fastq \
+ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 \
+LEADING:3 \
+TRAILING:3 \
+SLIDINGWINDOW:4:15 \
+MINLEN:36
+
+-----------------------------------------------------------------
+
+# Sample_1_2 disease condition 
+
+trimmomatic SE -threads 4 -phred33 \
+SRR33341768.fastq \
+trimmed_fastq/Sample_1_2_trimmed.fastq \
+ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 \
+LEADING:3 \
+TRAILING:3 \
+SLIDINGWINDOW:4:15 \
+MINLEN:36
+
+-----------------------------------------------------------------
+
+# Sample_1_3 disease condition
+ 
+trimmomatic SE -threads 4 -phred33 \
+SRR33341767.fastq \
+trimmed_fastq/Sample_1_3_trimmed.fastq \
+ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 \
+LEADING:3 \
+TRAILING:3 \
+SLIDINGWINDOW:4:15 \
+MINLEN:36
+
+-----------------------------------------------------------------
+
+# Sample_1_4 disease condition
+ 
+trimmomatic SE -threads 4 -phred33 \
+SRR33341766.fastq \
+trimmed_fastq/Sample_1_4_trimmed.fastq \
+ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 \
+LEADING:3 \
+TRAILING:3 \
+SLIDINGWINDOW:4:15 \
+MINLEN:36
+
+-----------------------------------------------------------------
+
+# Sample_2_1 control condition
+ 
+trimmomatic SE -threads 4 -phred33 \
+SRR33341765.fastq \
+trimmed_fastq/Sample_2_1_trimmed.fastq \
+ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 \
+LEADING:3 \
+TRAILING:3 \
+SLIDINGWINDOW:4:15 \
+MINLEN:36
+
+-----------------------------------------------------------------
+
+# Sample_2_2 control condition
+  
+trimmomatic SE -threads 4 -phred33 \
+SRR33341764.fastq \
+trimmed_fastq/Sample_2_2_trimmed.fastq \
+ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 \
+LEADING:3 \
+TRAILING:3 \
+SLIDINGWINDOW:4:15 \
+MINLEN:36
+
+-----------------------------------------------------------------
+
+# Sample_2_3 control condition
+  
+trimmomatic SE -threads 4 -phred33 \
+SRR33341763.fastq \
+trimmed_fastq/Sample_2_3_trimmed.fastq \
+ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 \
+LEADING:3 \
+TRAILING:3 \
+SLIDINGWINDOW:4:15 \
+MINLEN:36
+
+-----------------------------------------------------------------
+
+# Sample_2_4 control condition
+  
+trimmomatic SE -threads 4 -phred33 \
+SRR33341762.fastq \
+trimmed_fastq/Sample_2_4_trimmed.fastq \
+ILLUMINACLIP:TruSeq3-SE.fa:2:30:10 \
+LEADING:3 \
+TRAILING:3 \
+SLIDINGWINDOW:4:15 \
+MINLEN:36
+
+-----------------------------------------------------------------
+OR
+-----------------------------------------------------------------
+# Trim all 8 files (control + disease) in a loop
+
+# create the script
+nano trim_all.sh
+
+
+# Paste this script into the terminal
+---------------------------------
+#!/bin/bash
+
+# Make sure output directory exists
+mkdir -p trimmed_fastq
+
+# Array of input files and corresponding sample names
+declare -a samples=(
+  "SRR33341769 Sample_1_1"
+  "SRR33341768 Sample_1_2"
+  "SRR33341767 Sample_1_3"
+  "SRR33341766 Sample_1_4"
+  "SRR33341765 Sample_2_1"
+  "SRR33341764 Sample_2_2"
+  "SRR33341763 Sample_2_3"
+  "SRR33341762 Sample_2_4"
+)
+
+# Path to adapter file (adjust if needed)
+ADAPTER="TruSeq3-SE.fa"
+
+# Loop through each sample and run Trimmomatic
+for entry in "${samples[@]}"; do
+  read SRR_ID SAMPLE_NAME <<< "$entry"
+  
+  echo "Trimming $SAMPLE_NAME ($SRR_ID)..."
+  
+  trimmomatic SE -threads 4 -phred33 \
+    "${SRR_ID}.fastq" \
+    "trimmed_fastq/${SAMPLE_NAME}_trimmed.fastq" \
+    ILLUMINACLIP:$ADAPTER:2:30:10 \
+    LEADING:3 \
+    TRAILING:3 \
+    SLIDINGWINDOW:4:15 \
+    MINLEN:36
+  
+  echo "Finished $SAMPLE_NAME"
+done
+
+echo "All samples trimmed."
+---------------------------------
+
+# Save the file:
+
+# Press Ctrl + O, then press Enter to save.
+
+# Press Ctrl + X to exit the editor.
+---------------------------------
+
+# Make the script executable
+chmod +x trim_all.sh
+
+---------------------------------
+
+# Run the script
+./trim_all.sh
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+
+# Run quality control again on trimmed files
+
+
+# Create output folder
+mkdir fastqc_trimmed_report 
+
+
+# Run FastQC on all trimmed files
+fastqc trimmed_fastq/*.fastq -o fastqc_trimmed_reports
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+
+# Align to genome using HISAT2
+
+# For Human(GRCh38)
+mkdir genome_index
+cd genome_index
+wget https://genome-idx.s3.amazonaws.com/hisat/grch38_genome.tar.gz
+tar -xvzf grch38_genome.tar.gz
+
+
+cd ..
+mkdir aligned_bam
+cd aligned_bam 
+mkdir aligned_sam 
+cd .. 
+
+-----------------------------------------------------------------
+# Sample_1_1 disease condition
+
+hisat2 -x genome_index/grch38/genome \
+  -U trimmed_fastq/Sample_1_1_trimmed.fastq \
+  -S aligned_bam/aligned_sam/Sample_1_1.sam
+
+---------------------------------
+#Explanation of flags:
+#Flag	Meaning
+# -x	Path to the HISAT2 index basename (e.g., grch38/genome)
+# -U	Input file for single-end reads
+# -S	Output SAM file
+# -p 4	(Optional) Use 4 threads for speed
+
+-----------------------------------------------------------------
+# Sample_1_2 disease condition 
+
+hisat2 -x genome_index/grch38/genome \
+  -U trimmed_fastq/Sample_1_2_trimmed.fastq \
+  -S aligned_bam/aligned_sam/Sample_1_2.sam
+
+-----------------------------------------------------------------
+# Sample_1_3 disease condition
+
+hisat2 -x genome_index/grch38/genome \
+  -U trimmed_fastq/Sample_1_3_trimmed.fastq \
+  -S aligned_bam/aligned_sam/Sample_1_3.sam
+
+-----------------------------------------------------------------
+# Sample_1_4 disease condition
+
+hisat2 -x genome_index/grch38/genome \
+  -U trimmed_fastq/Sample_1_4_trimmed.fastq \
+  -S aligned_bam/aligned_sam/Sample_1_4.sam
+
+-----------------------------------------------------------------
+# Sample_2_1 control condition
+
+hisat2 -x genome_index/grch38/genome \
+  -U trimmed_fastq/Sample_2_1_trimmed.fastq \
+  -S aligned_bam/aligned_sam/Sample_2_1.sam
+
+-----------------------------------------------------------------
+# Sample_2_2 control condition
+
+hisat2 -x genome_index/grch38/genome \
+  -U trimmed_fastq/Sample_2_2_trimmed.fastq \
+  -S aligned_bam/aligned_sam/Sample_2_2.sam 
+
+-----------------------------------------------------------------
+# Sample_2_3 control condition
+
+hisat2 -x genome_index/grch38/genome \
+  -U trimmed_fastq/Sample_2_3_trimmed.fastq \
+  -S aligned_bam/aligned_sam/Sample_2_3.sam
+ 
+-----------------------------------------------------------------
+# Sample_2_4 control condition
+
+hisat2 -x genome_index/grch38/genome \
+  -U trimmed_fastq/Sample_2_4_trimmed.fastq \
+  -S aligned_bam/aligned_sam/Sample_2_4.sam
+
+
+-----------------------------------------------------------------
+OR
+-----------------------------------------------------------------
+
+# align_all.sh
+
+nano align_all.sh 
+
+-----------------------------------------------------------------
+#!/bin/bash
+
+# Create output directory if it doesn't exist
+mkdir -p aligned_bam/aligned_sam
+
+# Define genome index path
+GENOME_INDEX="genome_index/grch38/genome"
+
+# Sample name array
+samples=(
+  "Sample_1_1"
+  "Sample_1_2"
+  "Sample_1_3"
+  "Sample_1_4"
+  "Sample_2_1"
+  "Sample_2_2"
+  "Sample_2_3"
+  "Sample_2_4"
+)
+
+# Loop through each sample and run HISAT2
+for sample in "${samples[@]}"
+do
+  echo "Aligning $sample..."
+  hisat2 -p 4 -x $GENOME_INDEX \
+    -U trimmed_fastq/${sample}_trimmed.fastq \
+    -S aligned_bam/aligned_sam/${sample}.sam
+  echo "$sample alignment complete."
+done
+
+echo "All alignments completed successfully."
+-----------------------------------------------------------------
+# Save
+
+# Make it executable:
+chmod +x align_all.sh
+
+# Run the script:
+./align_all.sh
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+
+# File conversion
+
+
+cd aligned_bam
+mkdir raw_bam
+mkdir sorted_bam
+cd ..
+
+
+# Sample_1_1 disease condition
+
+samtools view -S -b aligned_bam/aligned_sam/Sample_1_1.sam > aligned_bam/raw_bam/Sample_1_1.bam
+
+samtools sort aligned_bam/raw_bam/Sample_1_1.bam -o aligned_bam/sorted_bam/Sample_1_1_sorted.bam
+
+samtools index aligned_bam/sorted_bam/Sample_1_1_sorted.bam
+
+
+# Step	  Command	  Why It’s Needed
+# Convert samtools view	  Convert .sam to .bam (compressed)
+# Sort	  samtools sort	  Required for indexing and downstream tools
+# Index	  samtools index  Enables fast querying & visualization
+-----------------------------------------------------------------
+
+# Sample_1_2 disease condition 
+
+samtools view -S -b aligned_bam/aligned_sam/Sample_1_2.sam > aligned_bam/raw_bam/Sample_1_2.bam
+samtools sort aligned_bam/raw_bam/Sample_1_2.bam -o aligned_bam/sorted_bam/Sample_1_2_sorted.bam
+samtools index aligned_bam/sorted_bam/Sample_1_2_sorted.bam
+
+-----------------------------------------------------------------
+# Sample_1_3 disease condition
+
+samtools view -S -b aligned_bam/aligned_sam/Sample_1_3.sam > aligned_bam/raw_bam/Sample_1_3.bam
+samtools sort aligned_bam/raw_bam/Sample_1_3.bam -o aligned_bam/sorted_bam/Sample_1_3_sorted.bam
+samtools index aligned_bam/sorted_bam/Sample_1_3_sorted.bam
+
+-----------------------------------------------------------------
+# Sample_1_4 disease condition
+
+samtools view -S -b aligned_bam/aligned_sam/Sample_1_4.sam > aligned_bam/raw_bam/Sample_1_4.bam
+samtools sort aligned_bam/raw_bam/Sample_1_4.bam -o aligned_bam/sorted_bam/Sample_1_4_sorted.bam
+samtools index aligned_bam/sorted_bam/Sample_1_4_sorted.bam
+
+-----------------------------------------------------------------
+# Sample_2_1 control condition
+
+samtools view -S -b aligned_bam/aligned_sam/Sample_2_1.sam > aligned_bam/raw_bam/Sample_2_1.bam
+samtools sort aligned_bam/raw_bam/Sample_2_1.bam -o aligned_bam/sorted_bam/Sample_2_1_sorted.bam
+samtools index aligned_bam/sorted_bam/Sample_2_1_sorted.bam
+
+-----------------------------------------------------------------
+# Sample_2_2 control condition
+
+samtools view -S -b aligned_bam/aligned_sam/Sample_2_2.sam > aligned_bam/raw_bam/Sample_2_2.bam
+samtools sort aligned_bam/raw_bam/Sample_2_2.bam -o aligned_bam/sorted_bam/Sample_2_2_sorted.bam
+samtools index aligned_bam/sorted_bam/Sample_2_2_sorted.bam 
+
+-----------------------------------------------------------------
+# Sample_2_3 control condition
+
+samtools view -S -b aligned_bam/aligned_sam/Sample_2_3.sam > aligned_bam/raw_bam/Sample_2_3.bam
+samtools sort aligned_bam/raw_bam/Sample_2_3.bam -o aligned_bam/sorted_bam/Sample_2_3_sorted.bam
+samtools index aligned_bam/sorted_bam/Sample_2_3_sorted.bam
+ 
+-----------------------------------------------------------------
+# Sample_2_4 control condition
+
+samtools view -S -b aligned_bam/aligned_sam/Sample_2_4.sam > aligned_bam/raw_bam/Sample_2_4.bam
+samtools sort aligned_bam/raw_bam/Sample_2_4.bam -o aligned_bam/sorted_bam/Sample_2_4_sorted.bam
+samtools index aligned_bam/sorted_bam/Sample_2_4_sorted.bam
+
+-----------------------------------------------------------------
+OR
+-----------------------------------------------------------------
+# RUN Script
+
+# convert_sort_index_all.sh
+
+nano convert_sort_index_all.sh
+
+------------------------------------
+#!/bin/bash
+
+# Create output directories if they don't exist
+mkdir -p aligned_bam/raw_bam
+mkdir -p aligned_bam/sorted_bam
+
+# Define sample names
+samples=(
+  Sample_1_1
+  Sample_1_2
+  Sample_1_3
+  Sample_1_4
+  Sample_2_1
+  Sample_2_2
+  Sample_2_3
+  Sample_2_4
+)
+
+# Loop through each sample and convert, sort, index
+for sample in "${samples[@]}"; do
+  echo "Processing $sample..."
+
+  # Convert SAM to BAM
+  samtools view -S -b aligned_bam/aligned_sam/${sample}.sam > aligned_bam/raw_bam/${sample}.bam
+
+  # Sort BAM
+  samtools sort aligned_bam/raw_bam/${sample}.bam -o aligned_bam/sorted_bam/${sample}_sorted.bam
+
+  # Index BAM
+  samtools index aligned_bam/sorted_bam/${sample}_sorted.bam
+
+  echo "$sample done."
+  echo "-----------------------------"
+done
+
+echo "All samples processed."
+------------------------------------
+
+# Save as convert_sort_index_all.sh
+
+-----------------------------------------------------------------
+
+# Make executable:
+
+chmod +x convert_sort_index_all.sh
+
+-----------------------------------------------------------------
+
+#Run the script:
+
+./convert_sort_index_all.sh
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+
+# Count reads per gene using featureCounts
+
+# To download the latest GTF file (Release 114)
+
+wget https://ftp.ensembl.org/pub/release-114/gtf/homo_sapiens/Homo_sapiens.GRCh38.114.gtf.gz
+
+# Unzip it
+
+gunzip Homo_sapiens.GRCh38.114.gtf.gz
+
+# Organize it
+
+mkdir -p annotation
+
+mv Homo_sapiens.GRCh38.114.gtf annotation/
+
+# Create counts directory
+
+mkdir -p counts
+
+# Run featureCounts on all samples
+
+featureCounts -T 8 -a annotation/Homo_sapiens.GRCh38.114.gtf \
+-o counts/read_counts.txt \
+aligned_bam/sorted_bam/Sample_*_sorted.bam
+
+
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+                              RStudio
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+
+All code with explanation are present is RNA_SEQ.R file
+ 
